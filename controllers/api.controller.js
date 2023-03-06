@@ -16,13 +16,20 @@ module.exports.getShedsCapacity = async (req, res) => {
       } 
     }
     return {
+      id: shed._id,
       location: shed.location,
       current_capacity: curcap,
-      unused_index
+      unused_index,
+      boxes: shed.boxes
     };
   });
   res.status(200).json(result)
 };
+
+module.exports.getAllBox = async (req,res) => {
+  const boxes = await Box.find({});
+  res.status(200).json(boxes);
+}
 
 module.exports.createNewShed = async (req, res) => {
   if (!req.body.shed) {
