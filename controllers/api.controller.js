@@ -1,29 +1,40 @@
-const Gunner = require("../models/gunner");
+const Shed = require("../models/shed");
 const Box = require("../models/box");
 
-module.exports.getGunnersCapacity = async (req, res) => {
-  const gunners = await Gunner.find({});
-  const result = gunners.map((gunner) => {
-    curcap = gunner.capacity - gunner.boxes.length;
+module.exports.getShedsCapacity = async (req, res) => {
+  const sheds = await Shed.find({}).populate({ path: "boxes" });;
+  const result = sheds.map((shed) => {
+    curcap = shed.capacity - shed.boxes.length;
+    const used_index = []
+    shed.boxes.forEach(box=>{
+      used_index.push(box.index);
+    })
+    const unused_index = []
+    for (let i = 0;i<shed.capacity;i++){
+      if (!(i in used_index)){
+        unused_index.push(i)
+      } 
+    }
     return {
-      location: gunner.location,
+      location: shed.location,
       current_capacity: curcap,
+      unused_index
     };
   });
-  res.status(200).send(JSON.stringify(result));
+  res.status(200).json(result)
 };
 
-module.exports.createNewGunner = async (req, res) => {
-  if (!req.body.gunner) {
-    res.status(400).send({ message: "You should post a gunner!" });
+module.exports.createNewShed = async (req, res) => {
+  if (!req.body.shed) {
+    res.status(400).send({ message: "You should post a shed!" });
     return;
   }
 
-  const gunner = new Gunner(req.body.gunner);
+  const shed = new Shed(req.body.shed);
 
   try {
-    const savedgunner = await gunner.save();
-    res.status(200).send(JSON.stringify(savedgunner));
+    const savedshed = await shed.save();
+    res.status(200).json(savedshed);
   } catch (e) {
     res
       .status(500)
@@ -37,32 +48,33 @@ module.exports.appendNewBox = async (req, res) => {
     return;
   }
 
-  const { gunnerid } = req.params;
-  const gunner = await Gunner.findById(gunnerid);
+  const { shedid } = req.params;
+  const shed = await Shed.findById(shedid);
 
-  if (!gunner) {
+  if (!shed) {
     res
       .status(404)
-      .send({ message: "Can't find the specific Id of the gunner" });
+      .send({ message: "Can't find the specific Id of the shed" });
     return;
   }
 
-  if (gunner.boxes.length + 1 > gunner.capacity) {
+  if (shed.boxes.length + 1 > shed.capacity) {
     res
       .status(400)
-      .send({ message: "The gunner have no capacity to append new box" });
+      .send({ message: "The shed have no capacity to append new box" });
     return;
   }
 
   const box = new Box(req.body.box);
+  box.shed = shed;
 
-  gunner.boxes.push(box);
-  gunner.save();
-  box.save();
+  shed.boxes.push(box);
+  await shed.save();
+  await box.save();
 
   res
     .status(200)
-    .send({ message: `Successfully to append the new box in ${gunnerid}` });
+    .send({ message: `Successfully to append the new box in ${shedid}` });
 };
 
 module.exports.takebox = async (req, res) => {
@@ -71,13 +83,13 @@ module.exports.takebox = async (req, res) => {
     return;
   }
 
-  const { gunnerid } = req.params;
-  const gunner = await Gunner.findById(gunnerid);
+  const { shedid } = req.params;
+  const shed = await Shed.findById(shedid);
 
-  if (!gunner) {
+  if (!shed) {
     res
       .status(404)
-      .send({ message: "Can't find the specific Id of the gunner" });
+      .send({ message: "Can't find the specific Id of the shed" });
     return;
   }
 
@@ -87,13 +99,15 @@ module.exports.takebox = async (req, res) => {
     res.status(404).send({ message: "Can't find the specific Id of the box" });
     return;
   }
+
   box.index = -1;
-  const newboxes = gunner.boxes.filter((box) => box._id != req.body.boxId);
-  gunner.boxes = newboxes;
-  await gunner.save();
+  box.shed = null;
+  const newboxes = shed.boxes.filter((box) => box._id != req.body.boxId);
+  shed.boxes = newboxes;
+  await shed.save();
   await box.save();
   res.status(200).send({
-    message: `You take box ${req.body.boxId} from gunner ${gunnerid}`,
+    message: `You take box ${req.body.boxId} from shed ${shedid}`,
   });
 };
 
@@ -107,23 +121,23 @@ module.exports.appendBox = async (req, res) => {
   const boxId = req.body.boxId;
   const index = req.body.index;
 
-  const { gunnerid } = req.params;
-  const gunner = await Gunner.findById(gunnerid);
+  const { shedid } = req.params;
+  const shed = await Shed.findById(shedid);
 
-  if (!gunner) {
+  if (!shed) {
     res
       .status(404)
-      .send({ message: "Can't find the specific Id of the gunner" });
+      .send({ message: "Can't find the specific Id of the shed" });
     return;
   }
-  if (gunner.boxes.length + 1 > gunner.capacity) {
+  if (shed.boxes.length + 1 > shed.capacity) {
     res
       .status(400)
-      .send({ message: "The gunner have no capacity to append new box" });
+      .send({ message: "The shed have no capacity to append new box" });
     return;
   }
-  if (index > gunner.capacity) {
-    res.status(400).send({ message: "There are something in the index" });
+  if (index > shed.capacity) {
+    res.status(400).send({ message: "Index is large than the capacity" });
     return;
   }
 
@@ -134,46 +148,47 @@ module.exports.appendBox = async (req, res) => {
     return;
   }
   if (box.index !== -1) {
-    res.status(400).send({ message: "The box is existed in some gunner" });
+    res.status(400).send({ message: "The box is existed in some shed" });
     return;
   }
 
   box.index = index;
-  gunner.boxes.push(box);
-  await gunner.save();
+  box.shed = shed
+  shed.boxes.push(box);
+  await shed.save();
   await box.save();
 
   res
     .status(200)
     .send({
-      message: `Successfully to append box ${boxId} to gunner ${gunnerid}`,
+      message: `Successfully to append box ${boxId} to shed ${shedid}`,
     });
 };
 
-module.exports.deleteGunner = async (req, res) => {
-  const { gunnerid } = req.params;
-  const gunner = await Gunner.findById(gunnerid).populate({ path: "boxes" });
+module.exports.deleteShed = async (req, res) => {
+  const { shedid } = req.params;
+  const shed = await Shed.findById(shedid).populate({ path: "boxes" });
 
-  if (!gunner) {
+  if (!shed) {
     res
       .status(404)
-      .send({ message: "Can't find the specific Id of the gunner" });
+      .send({ message: "Can't find the specific Id of the shed" });
     return;
   }
 
-  for (const box of gunner.boxes) {
+  for (const box of shed.boxes) {
     box.index = -1;
+    box.shed = null;
     await box.save();
   }
-  console.log(gunner);
 
-  await Gunner.findByIdAndDelete(gunnerid);
-  res.status(200).send({ message: `deleted the gunner ${gunnerid}` });
+  await Shed.findByIdAndDelete(shedid);
+  res.status(200).send({ message: `deleted the shed ${shedid}` });
 };
 
 module.exports.deleteBox = async (req, res) => {
-    const {gunnerid,boxid} = req.params;
-    await Gunner.findByIdAndUpdate(gunnerid,{$pull:{boxes:boxid}});
+    const {shedid,boxid} = req.params;
+    await Shed.findByIdAndUpdate(shedid,{$pull:{boxes:boxid}});
     await Box.findByIdAndDelete(boxid);
-    res.status(200).send({message:`You deleted box ${boxid} in gunner ${gunnerid}`})
+    res.status(200).send({message:`You deleted box ${boxid} in shed ${shedid}`})
 };

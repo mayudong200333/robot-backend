@@ -1,14 +1,14 @@
 const mongoose = require("mongoose");
 const Schema = mongoose.Schema;
 
-const GunnerSchema = new Schema({
+const ShedSchema = new Schema({
   location: {
     x: {
-      type: Number,
+      type: mongoose.Types.Decimal128,
       required: true,
     },
     y: {
-      type: Number,
+      type: mongoose.Types.Decimal128,
       required: true,
     },
   },
@@ -21,7 +21,15 @@ const GunnerSchema = new Schema({
   capacity: {
     type:Number,
     required:true
+  },
+  height:{
+    type:mongoose.Types.Decimal128,
+    required:true
+  },
+  rowNumber: {
+    type:Number,
+    required:true
   }
 });
 
-module.exports = mongoose.model("Gunner", GunnerSchema);
+module.exports = mongoose.model("Shed", ShedSchema);

@@ -2,18 +2,18 @@ const express = require("express");
 const router = express.Router();
 const api = require("../controllers/api.controller");
 
-router.get("/currentcapacity",api.getGunnersCapacity);
+router.get("/currentcapacity",api.getShedsCapacity);
 
-router.post("/newgunner", api.createNewGunner);
+router.post("/newshed", api.createNewShed);
 
-router.post("/appendnewbox/:gunnerid",api.appendNewBox);
+router.post("/appendnewbox/:shedid",api.appendNewBox);
 
-router.patch("/takebox/:gunnerid",api.takebox);
+router.patch("/takebox/:shedid",api.takebox);
 
-router.patch("/appendbox/:gunnerid",api.appendBox);
+router.patch("/appendbox/:shedid",api.appendBox);
 
-router.delete("/deletegunner/:gunnerid",api.deleteGunner);
+router.delete("/deleteshed/:shedid",api.deleteShed);
 
-router.delete("/deletebox/:gunnerid/:boxid",api.deleteBox);
+router.delete("/deletebox/:shedid/:boxid",api.deleteBox);
   
 module.exports = router;
