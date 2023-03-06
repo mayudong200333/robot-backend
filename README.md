@@ -31,24 +31,26 @@ The Default Server's endpoint:
 
 Endpoints | Type | Parameters | Description
 --- | --- | --- | ---
-/api/currentcapacity | GET | NA | Get the current capacity from all the shef
-/newgunner | POST | body(shef description json) | create a new shef
-/appendnewbox/<shef's id> | POST | body(box description json) | append a new box to the specific shef 
-/takebox/<shef's id> | PATCH | body(box's Id json) | get an existed box from a shef 
-/appendbox/<shef's id> | PATCH | body(box's Id and index json) | put an existed box to the shef
-/deletegunner/<shef's id> | DELETE | NA | delete an existed shef
-/deletebox/<shef's id>/<box's id> | DELETE | NA | delete an box on the shef
+/api/currentcapacity | GET | NA | Get the current capacity from all the shed
+/api/newshed | POST | body(shed description json) | create a new shed
+/api/appendnewbox/<shed's id> | POST | body(box description json) | append a new box to the specific shed 
+/api/takebox/<shed's id> | PATCH | body(box's Id json) | get an existed box from a shed
+/api/appendbox/<shed's id> | PATCH | body(box's Id and index json) | put an existed box to the shed
+/api/deleteshed/<shed's id> | DELETE | NA | delete an existed shed
+/api/deletebox/<shed's id>/<box's id> | DELETE | NA | delete an box on the shed
 
-shef description json format (empty)
+shed description json format (empty)
 ```json
 {
-    "gunner":{
+    "shed":{
         "location":{
-            "x": "<shef's  x location> (should be a number)",
-            "y": "<shef's  y location>  (should be a number)"
+            "x": "<shed's  x location> (should be a number)",
+            "y": "<shed's  y location>  (should be a number)"
         },
         "boxes":[],
-        "capacity": "<shef's capacity>"
+        "capacity": "<shed's capacity>",
+        "height": "<shed's height>",
+        "rowNumber": "<shed's rowNumber>"
     }
 }
 ```
@@ -59,7 +61,8 @@ box description json
 {
     "box": {
         "assembled": "ture|false",
-        "index": "number"
+        "index": "number",
+        "productNumber" :"product's Id in the box (Optional)"
     }
 }
 ```
@@ -76,7 +79,7 @@ box's Id and index json
 
 ```json
 {
-    "boxId": "<box's id in the mongoDB>"
+    "boxId": "<box's id in the mongoDB>",
     "index": "<number>"
 }
 ```
