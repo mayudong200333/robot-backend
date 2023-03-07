@@ -11,7 +11,7 @@ module.exports.getShedsCapacity = async (req, res) => {
     })
     const unused_index = []
     for (let i = 0;i<shed.capacity;i++){
-      if (!(i in used_index)){
+      if (!(used_index.includes(i))){
         unused_index.push(i)
       } 
     }
