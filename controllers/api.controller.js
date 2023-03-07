@@ -19,6 +19,9 @@ module.exports.getShedsCapacity = async (req, res) => {
       id: shed._id,
       location: shed.location,
       current_capacity: curcap,
+      capacity:shed.capacity,
+      height:shed.height,
+      rowNumber:shed.rowNumber,
       unused_index,
       boxes: shed.boxes
     };
@@ -28,6 +31,11 @@ module.exports.getShedsCapacity = async (req, res) => {
 
 module.exports.getAllBox = async (req,res) => {
   const boxes = await Box.find({});
+  res.status(200).json(boxes);
+}
+
+module.exports.getAllFreeBox = async (req,res) => {
+  const boxes = await Box.find({index:{$eq:-1}});
   res.status(200).json(boxes);
 }
 

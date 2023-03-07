@@ -4,7 +4,9 @@ const api = require("../controllers/api.controller");
 
 router.get("/currentcapacity",api.getShedsCapacity);
 
-router.get("/getallbox",api.getAllBox)
+router.get("/getallbox",api.getAllBox);
+
+router.get("/getallfreebox",api.getAllFreeBox);
 
 router.post("/newshed", api.createNewShed);
 

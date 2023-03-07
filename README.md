@@ -33,6 +33,7 @@ Endpoints | Type | Parameters | Description
 --- | --- | --- | ---
 /api/currentcapacity | GET | NA | Get the current capacity from all the shed
 /api/getallbox | GET | NA | Get the information of all boxes
+/api/getallfreebox | GET | NA | Get the information of free boxes
 /api/newshed | POST | body(shed description json) | create a new shed
 /api/appendnewbox/<shed's id> | POST | body(box description json) | append a new box to the specific shed 
 /api/takebox/<shed's id> | PATCH | body(box's Id json) | get an existed box from a shed
