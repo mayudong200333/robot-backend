@@ -1,8 +1,10 @@
+require('dotenv').config();
+
 const mongoose = require('mongoose');
 const Box = require('../models/box');
 const Shed = require('../models/shed');
 
-const dbUrl = 'mongodb://localhost:27017/warehouse'
+const dbUrl = process.env.DB_URL;
 
 mongoose.connect(dbUrl,);
 

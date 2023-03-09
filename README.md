@@ -21,6 +21,9 @@ Install the denpendencies and then run the server
 ```bash
 npm install
 
+# seeds the DB
+node seeds/index.js
+
 node server.js
 ```
 
